@@ -17,9 +17,8 @@ jobs:
   wget:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v2    
+    - uses: actions/checkout@v2    
     - name: wget
-      uses: mark2me/covid19-tw@master
+      uses: mark2me/covid19-tw@main
       with:
         args: -O sample.json https://data.cdc.gov.tw/download?resourceid=a59483fd-4b09-42bd-af15-3c123147d7e3&dataurl=https://od.cdc.gov.tw/eic/Day_Confirmation_Age_County_Gender_19CoV.json
