@@ -11,13 +11,13 @@ on:
     - cron:  '0 */4 * * *'  #every 4
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-    branches: [ main ]
+
         
 jobs:
   wget:
     runs-on: ubuntu-latest
     steps:
-     - name: Checkout repo
+    - name: Checkout repo
       id: checkout
       uses: actions/checkout@v2
     - name: wget
