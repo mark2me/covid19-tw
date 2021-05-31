@@ -11,6 +11,7 @@ on:
     - cron:  '0 */4 * * *'  #every 4
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    branches: [ main ]
 
 jobs:
   wget:
@@ -19,4 +20,4 @@ jobs:
     - name: wget
       uses: wei/wget@v1
       with:
-        args: -O sample.json https://data.cdc.gov.tw/download?resourceid=3c1e263d-16ec-4d70-b56c-21c9e2171fc7&dataurl=https://od.cdc.gov.tw/eic/Day_Confirmation_Age_County_Gender_19CoV.csv
+        args: -O sample.json https://data.cdc.gov.tw/download?resourceid=a59483fd-4b09-42bd-af15-3c123147d7e3&dataurl=https://od.cdc.gov.tw/eic/Day_Confirmation_Age_County_Gender_19CoV.json
