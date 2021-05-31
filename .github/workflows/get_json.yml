@@ -12,13 +12,18 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-        
 jobs:
-  wget:
+  keep_file_updated:
     runs-on: ubuntu-latest
+    name: Keep file updated
     steps:
-    - uses: actions/checkout@v2    
-    - name: wget
+    - name: Checkout repo
+      id: checkout
+      uses: actions/checkout@v2
+    - name: Update file
+      id: update_file
       uses: mark2me/covid19-tw@main
       with:
-        args: -O sample.json https://data.cdc.gov.tw/download?resourceid=a59483fd-4b09-42bd-af15-3c123147d7e3&dataurl=https://od.cdc.gov.tw/eic/Day_Confirmation_Age_County_Gender_19CoV.json
+        url: https://data.cdc.gov.tw/download?resourceid=a59483fd-4b09-42bd-af15-3c123147d7e3&dataurl=https://od.cdc.gov.tw/eic/Day_Confirmation_Age_County_Gender_19CoV.json
+        file_in_repo: sample.json
+        
