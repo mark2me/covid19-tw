@@ -10,7 +10,7 @@ inputs:
   git_user:
     description: 'The name of the git user'
     required: true
-    default: 'thelastproject/keep-remote-locally-up-to-date'
+    default: 'mark2me/covid19-tw'
   git_email:
     description: 'The email of the git user'
     required: true
