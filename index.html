@@ -21,32 +21,34 @@
 
         $(function(){
 
+            /*
             var url = "https://data.cdc.gov.tw/api/3/action/datastore_search_sql";
-            var sql = {
+            var data = {
                 sql:  'SELECT 個案研判日 as dd,縣市 as cy,性別 as sex,確定病例數 as n from "3c1e263d-16ec-4d70-b56c-21c9e2171fc7" WHERE 是否為境外移入=\'否\' AND 個案研判日>=\'20210511\''
             }
 
             $.ajax({
                 url: url,
-                data: sql,
+                data: data,
                 cache: true,
                 dataType: 'jsonp',
                 success: function(data) {
 
                     //alert('Total results found: ' + data.result.total)
-                    $('#total').text(data.result.total);
+                    console.log(data);
 
                     $.each( data.result.records , function(index,val){
-                        //if( val.個案研判日 > 20210501 ){
 
-                        if( !days[val.dd] ){
-                            days[val.dd] = {};
+                        //if( val.個案研判日 <= 20210511 ) return;
+
+                        if( !days[val.個案研判日] ){
+                            days[val.個案研判日] = {};
                         }
 
-                        if( days[val.dd][val.cy] ){
-                            days[val.dd][val.cy] += parseInt(val.n);
+                        if( days[val.個案研判日][val.縣市] ){
+                            days[val.個案研判日][val.縣市] += 1; //parseInt(val.n)
                         }else{
-                            days[val.dd][val.cy] = parseInt(val.n);
+                            days[val.個案研判日][val.縣市] = 1; //parseInt(val.n)
                         }
 
                         if( data.result.records.length == (index+1)){
@@ -55,7 +57,32 @@
                             google.charts.setOnLoadCallback(drawBasic);
                         }
                     });
+
                 }
+            });
+            */
+
+            $.getJSON( "Day_Confirmation_Age_County_Gender_19CoV.json", function( data ) {
+
+                    $.each( data , function(index,val){
+
+                        if( val.個案研判日 <= '20210511' ) return;
+
+                        if( !days[val.個案研判日] ){
+                            days[val.個案研判日] = {};
+                        }
+
+                        if( days[val.個案研判日][val.縣市] ){
+                            days[val.個案研判日][val.縣市] += parseInt(val.確定病例數)
+                        }else{
+                            days[val.個案研判日][val.縣市] = parseInt(val.確定病例數)
+                        }
+
+                    });
+
+                    console.log(days);
+                    google.charts.load('current', {packages: ['corechart', 'bar']});
+                    google.charts.setOnLoadCallback(drawBasic);
             });
 
             $(window).resize(function() {
