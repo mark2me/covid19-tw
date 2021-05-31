@@ -17,6 +17,8 @@ jobs:
   wget:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout repo
+      uses: actions/checkout@main    
     - name: wget
       uses: mark2me/covid19-tw@main
       with:
