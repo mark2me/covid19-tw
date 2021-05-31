@@ -12,4 +12,4 @@ git config user.email "$git_email"
 
 git add "$file_in_repo"
 git commit -m "Update $(basename "$file_in_repo") from $url"
-git push origin HEAD:master
+git push
