@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Keep file updated
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Update file
       id: update_file
       uses: mark2me/covid19-tw@main
