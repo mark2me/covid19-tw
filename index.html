@@ -3,6 +3,7 @@
         <title>2021 台灣本土 COVID-19 確診案例日期統計表</title>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-4-grid@3.4.0/css/grid.min.css" integrity="sha256-raGUlaaCI4l2GoQ6cxLH8ODuDTwuQVL9RU06sSvpD6w=" crossorigin="anonymous">
     </head>
     <body style="padding: 20px;">
 
@@ -14,10 +15,46 @@
             資料來源：<a href="https://data.cdc.gov.tw/dataset/agsdctable-day-19cov" target="_blank">https://data.cdc.gov.tw/dataset/agsdctable-day-19cov</a>
         </p>
 
+        <div style="border-top: 1px solid #999;margin-top:50px; padding-bottom: 20px;">&nbsp;</div>
+        <div class="container-fluid">
+            <h3 style="text-align: center;">台北市</h3>
+            <div id="zone_taipei" class="row">
+            </div>
+        </div>
+
+        <div style="border-top: 1px solid #999;margin-top:50px; padding-bottom: 20px;">&nbsp;</div>
+
+        <div class="container-fluid">
+            <h3 style="text-align: center;">新北市</h3>
+            <div id="zone_newtaipei" class="row">
+            </div>
+        </div>
 
         <script>
+
+        Date.prototype.yyyymmdd = function() {
+            var mm = this.getMonth() + 1;
+            var dd = this.getDate();
+
+            return [this.getFullYear(),
+                (mm>9 ? '' : '0') + mm,
+                (dd>9 ? '' : '0') + dd
+            ].join('');
+        };
+
+        var dayRange = [];
+        var start = new Date("05/11/2021");
+        var end = new Date();
+        var loop = new Date(start);
+        while(loop <= end){
+            dayRange.push(loop.yyyymmdd());
+            var newDate = loop.setDate(loop.getDate() + 1);
+            loop = new Date(newDate);
+        }
+
         var citys = {};
         var days = {};
+        var colors = ['#0066ff','#29a329','#ff6600','#ff3399','#ffff00','#cc3300','#33ccff','#000099','#666699','#336600'];
 
         $(function(){
 
@@ -26,40 +63,6 @@
             var data = {
                 sql:  'SELECT 個案研判日 as dd,縣市 as cy,性別 as sex,確定病例數 as n from "3c1e263d-16ec-4d70-b56c-21c9e2171fc7" WHERE 是否為境外移入=\'否\' AND 個案研判日>=\'20210511\''
             }
-
-            $.ajax({
-                url: url,
-                data: data,
-                cache: true,
-                dataType: 'jsonp',
-                success: function(data) {
-
-                    //alert('Total results found: ' + data.result.total)
-                    console.log(data);
-
-                    $.each( data.result.records , function(index,val){
-
-                        //if( val.個案研判日 <= 20210511 ) return;
-
-                        if( !days[val.個案研判日] ){
-                            days[val.個案研判日] = {};
-                        }
-
-                        if( days[val.個案研判日][val.縣市] ){
-                            days[val.個案研判日][val.縣市] += 1; //parseInt(val.n)
-                        }else{
-                            days[val.個案研判日][val.縣市] = 1; //parseInt(val.n)
-                        }
-
-                        if( data.result.records.length == (index+1)){
-                            console.log(days);
-                            google.charts.load('current', {packages: ['corechart', 'bar']});
-                            google.charts.setOnLoadCallback(drawBasic);
-                        }
-                    });
-
-                }
-            });
             */
 
             $.getJSON( "Day_Confirmation_Age_County_Gender_19CoV.json", function( data ) {
@@ -67,10 +70,11 @@
                     $.each( data , function(index,val){
 
                         if( val.個案研判日 <= '20210511' ) return;
+                        if( val.是否為境外移入 == '是' ) return;
 
-                        if( !days[val.個案研判日] ){
-                            days[val.個案研判日] = {};
-                        }
+                        //console.log(index,val);
+
+                        if( !days[val.個案研判日] ) days[val.個案研判日] = {};
 
                         if( days[val.個案研判日][val.縣市] ){
                             days[val.個案研判日][val.縣市] += parseInt(val.確定病例數)
@@ -78,11 +82,21 @@
                             days[val.個案研判日][val.縣市] = parseInt(val.確定病例數)
                         }
 
+                        //
+                        if( val.縣市 !== '空值' && !citys[val.縣市] ) citys[val.縣市] = {};
+                        if( val.個案研判日 !== '' && !citys[val.縣市][val.鄉鎮] ) citys[val.縣市][val.鄉鎮] = {};
+                        if( citys[val.縣市][val.鄉鎮][val.個案研判日] ){
+                            citys[val.縣市][val.鄉鎮][val.個案研判日] +=  parseInt(val.確定病例數)
+                        }else{
+                            citys[val.縣市][val.鄉鎮][val.個案研判日] =  parseInt(val.確定病例數)
+                        }
+
                     });
 
-                    console.log(days);
+                    //console.log(days);
                     google.charts.load('current', {packages: ['corechart', 'bar']});
-                    google.charts.setOnLoadCallback(drawBasic);
+                    google.charts.setOnLoadCallback(drawAll);
+
             });
 
             $(window).resize(function() {
@@ -94,11 +108,11 @@
 
 
             $(window).on('resizeEnd', function() {
-                drawBasic();
+                drawAll();
             });
         });
 
-        function drawBasic() {
+        function drawAll() {
 
             var row = [];
             row.push(['個案研判日', { role: 'annotation' }, '其他縣市', '新北市', '台北市' ]);  //{ role: 'annotation' }
@@ -110,12 +124,10 @@
                 row.push([ (d.substring(4,6)+'/'+d.substring(6)) , tol, (tol - v.台北市 - v.新北市), v.新北市 , v.台北市 ]);
             });
 
-            console.log(row);
-
-            var data = google.visualization.arrayToDataTable(row);
+            var data = new google.visualization.arrayToDataTable(row);
 
             var options = {
-                title: '台灣本土確診案例數',
+                //title: '台灣本土確診案例數',
                 subtitle: '從2021-05-11',
                 bar: {groupWidth: "80%"},
                 isStacked: 'absolute',
@@ -129,6 +141,48 @@
 
             var chart = new google.visualization.ColumnChart( document.getElementById('chart_div') );
             chart.draw(data, options);
+
+            // 台北市
+            drawCity(citys.台北市,$('#zone_taipei'));
+            drawCity(citys.新北市,$('#zone_newtaipei'));
+        }
+
+        function drawCity(cname,id) {
+
+            $.each(cname,function(zname,nums){
+                var dom = $('<div>').attr('id',zname).addClass('col-12 col-sm-6 col-lg-4');
+                    dom.appendTo( id );
+                var row = [];
+                var color = colors[Math.floor(Math.random() * colors.length)];
+                var total = 0;
+
+                row.push(['個案研判日', '數量', { role: 'style' } ]);
+                $.each(dayRange,function(k,d){
+                    total += parseInt( (nums[d] ? nums[d]:0) );
+                    row.push([
+                        (d.substring(4,6)+'/'+d.substring(6)) ,
+                        (nums[d] ? nums[d]:0),
+                        color
+                    ]);
+                });
+
+                var data = new google.visualization.arrayToDataTable(row);
+
+                var options = {
+                    title: '台北市 '+ zname + '('+total+')',
+                    bar: {groupWidth: "60%"},
+                    vAxis:{
+                        maxValue: 200,
+                        title: '每日總計案例數'
+                    },
+                    hAxis:{
+                        title: '個案研判日期（非校正回歸）'
+                    }
+                };
+
+                var chart = new google.visualization.ColumnChart( document.getElementById(zname) );
+                chart.draw(data, options);
+            });
         }
         </script>
 
