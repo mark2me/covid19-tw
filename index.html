@@ -7,7 +7,7 @@
     </head>
     <body style="padding: 20px;">
 
-        <h3 style="text-align: center;">地區年齡性別統計表-嚴重特殊傳染性肺炎-依個案研判日統計</h3>
+        <h3 style="text-align: center;">2021 台灣本土 COVID-19 確診案例統計-依個案研判日統計</h3>
 
         <div id="chart_div" style="height: 400px; width: 100%; max-width: 1600px; margin: 20px auto 0;"></div>
 
@@ -31,27 +31,6 @@
         </div>
 
         <script>
-
-        Date.prototype.yyyymmdd = function() {
-            var mm = this.getMonth() + 1;
-            var dd = this.getDate();
-
-            return [this.getFullYear(),
-                (mm>9 ? '' : '0') + mm,
-                (dd>9 ? '' : '0') + dd
-            ].join('');
-        };
-
-        var dayRange = [];
-        var start = new Date("05/11/2021");
-        var end = new Date();
-        var loop = new Date(start);
-        while(loop <= end){
-            dayRange.push(loop.yyyymmdd());
-            var newDate = loop.setDate(loop.getDate() + 1);
-            loop = new Date(newDate);
-        }
-
         var citys = {};
         var days = {};
         var colors = ['#0066ff','#29a329','#ff6600','#ff3399','#ffff00','#cc3300','#33ccff','#000099','#666699','#336600'];
@@ -59,11 +38,29 @@
         $(function(){
 
             /*
-            var url = "https://data.cdc.gov.tw/api/3/action/datastore_search_sql";
-            var data = {
+            var endPo = "https://data.cdc.gov.tw/api/3/action/datastore_search_sql";
+            var args = {
                 sql:  'SELECT 個案研判日 as dd,縣市 as cy,性別 as sex,確定病例數 as n from "3c1e263d-16ec-4d70-b56c-21c9e2171fc7" WHERE 是否為境外移入=\'否\' AND 個案研判日>=\'20210511\''
             }
             */
+
+            var endPo = 'https://data.cdc.gov.tw/api/3/action/datastore_search';
+            var args = {
+                resource_id: '3c1e263d-16ec-4d70-b56c-21c9e2171fc7', // the resource id
+                limit: 5000,
+                filters: '{"是否為境外移入":"否","個案研判日":"20210511"}'
+                //q: 'abc'
+            }
+
+            $.ajax({
+                url: endPo,
+                data: args,
+                dataType: 'jsonp',
+                cache: true,
+                success: function(data) {
+                    console.log(data);
+                }
+            });
 
             $.getJSON( "Day_Confirmation_Age_County_Gender_19CoV.json", function( data ) {
 
@@ -150,14 +147,14 @@
         function drawCity(cname,id) {
 
             $.each(cname,function(zname,nums){
-                var dom = $('<div>').attr('id',zname).addClass('col-12 col-sm-6 col-lg-4');
+                var dom = $('<div>').attr('id',zname).addClass('col-12 col-md-6 col-lg-4 pb-5');
                     dom.appendTo( id );
                 var row = [];
                 var color = colors[Math.floor(Math.random() * colors.length)];
                 var total = 0;
 
                 row.push(['個案研判日', '數量', { role: 'style' } ]);
-                $.each(dayRange,function(k,d){
+                $.each(days,function(d){
                     total += parseInt( (nums[d] ? nums[d]:0) );
                     row.push([
                         (d.substring(4,6)+'/'+d.substring(6)) ,
@@ -169,11 +166,12 @@
                 var data = new google.visualization.arrayToDataTable(row);
 
                 var options = {
-                    title: zname + ' ('+total+')',
+                    title: zname + ' ('+total+' 例)',
                     bar: {groupWidth: "60%"},
+                    legend: { position: "none" },
                     vAxis:{
                         maxValue: 200,
-                        title: '每日總計案例數'
+                        title: '日案例數'
                     },
                     hAxis:{
                         title: '個案研判日期（非校正回歸）'
