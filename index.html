@@ -17,7 +17,7 @@
 
         <div style="border-top: 1px solid #999;margin-top:50px; padding-bottom: 20px;">&nbsp;</div>
         <div class="container-fluid">
-            <h3 style="text-align: center;">台北市</h3>
+            <h3 style="text-align: center;">台北市 <span id="tol_taipei"></span></h3>
             <div id="zone_taipei" class="row">
             </div>
         </div>
@@ -25,7 +25,7 @@
         <div style="border-top: 1px solid #999;margin-top:50px; padding-bottom: 20px;">&nbsp;</div>
 
         <div class="container-fluid">
-            <h3 style="text-align: center;">新北市</h3>
+            <h3 style="text-align: center;">新北市 <span id="tol_newtaipei"></span></h3>
             <div id="zone_newtaipei" class="row">
             </div>
         </div>
@@ -44,6 +44,7 @@
             }
             */
 
+            /*
             var endPo = 'https://data.cdc.gov.tw/api/3/action/datastore_search';
             var args = {
                 resource_id: '3c1e263d-16ec-4d70-b56c-21c9e2171fc7', // the resource id
@@ -61,6 +62,7 @@
                     console.log(data);
                 }
             });
+            */
 
             $.getJSON( "Day_Confirmation_Age_County_Gender_19CoV.json", function( data ) {
 
@@ -109,6 +111,7 @@
             });
         });
 
+
         function drawAll() {
 
             var row = [];
@@ -140,15 +143,16 @@
             chart.draw(data, options);
 
             // 台北市
-            drawCity(citys.台北市,$('#zone_taipei'));
-            drawCity(citys.新北市,$('#zone_newtaipei'));
+            drawCity(citys.台北市, 'taipei');
+            drawCity(citys.新北市, 'newtaipei');
         }
 
-        function drawCity(cname,id) {
+        function drawCity(cdata,cname) {
 
-            $.each(cname,function(zname,nums){
-                var dom = $('<div>').attr('id',zname).addClass('col-12 col-md-6 col-lg-4 pb-5');
-                    dom.appendTo( id );
+            var ct_total = 0;
+
+            $.each(cdata,function(zname,nums){
+
                 var row = [];
                 var color = colors[Math.floor(Math.random() * colors.length)];
                 var total = 0;
@@ -163,8 +167,11 @@
                     ]);
                 });
 
-                var data = new google.visualization.arrayToDataTable(row);
+                var dom = $('<div>').attr('id',zname).attr('data-nums',total).addClass('city col-12 col-md-6 col-lg-4 pb-5').appendTo( $('#zone_'+cname) );
 
+                ct_total += total;
+
+                var data = new google.visualization.arrayToDataTable(row);
                 var options = {
                     title: zname + ' ('+total+' 例)',
                     bar: {groupWidth: "60%"},
@@ -181,6 +188,21 @@
                 var chart = new google.visualization.ColumnChart( document.getElementById(zname) );
                 chart.draw(data, options);
             });
+
+            $('#tol_'+cname).text(ct_total);
+
+            // sort
+            for( i=0 ; i< $('#zone_'+cname+' .city').length ; i++){
+                for( j=0 ; j< $('#zone_'+cname+' .city').length ; j++){
+                    $c1 = $('#zone_'+cname+' .city').eq(j);
+                    $c2 = $('#zone_'+cname+' .city').eq(j+1);
+                    if( $c1.data('nums') < $c2.data('nums') ){
+                        $c1.before($c2);
+                    }
+                }
+            }
+
+
         }
         </script>
 
