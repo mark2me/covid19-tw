@@ -6,6 +6,10 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-4-grid@3.4.0/css/grid.min.css" integrity="sha256-raGUlaaCI4l2GoQ6cxLH8ODuDTwuQVL9RU06sSvpD6w=" crossorigin="anonymous">
+        <style>
+        .section_city{ border-top: 1px solid #999;margin-top:50px; padding-top: 20px; }
+        .section_city h3{ text-align: center;}
+        </style>
     </head>
     <body style="margin:0;padding-top: 20px;">
 
@@ -19,20 +23,8 @@
             </p>
         </div>
 
-        <div style="border-top: 1px solid #999;margin-top:50px; padding-bottom: 20px;">&nbsp;</div>
-        <div class="container-fluid">
-            <h3 style="text-align: center;">台北市 <span id="tol_taipei"></span></h3>
-            <div id="zone_taipei" class="row">
-            </div>
-        </div>
+        <div id="city_chart"></div>
 
-        <div style="border-top: 1px solid #999;margin-top:50px; padding-bottom: 20px;">&nbsp;</div>
-
-        <div class="container-fluid">
-            <h3 style="text-align: center;">新北市 <span id="tol_newtaipei"></span></h3>
-            <div id="zone_newtaipei" class="row">
-            </div>
-        </div>
 
         <script>
         var citys = {};
@@ -147,17 +139,23 @@
             var chart = new google.visualization.ColumnChart( document.getElementById('chart_div') );
             chart.draw(data, options);
 
-            // 台北市
-            drawCity(citys.台北市, 'taipei');
-            drawCity(citys.新北市, 'newtaipei');
+            //draw city
+            drawCity('台北市');
+            drawCity('新北市');
         }
 
-        function drawCity(cdata,cname) {
+        function drawCity(city) {
+
+            //add dom
+            var $newCity = $('<div>').attr('id','city_'+city).addClass('container-fluid section_city');
+            $('<h3>'+city+' <span id="city_tol"></span></h3>').appendTo( $newCity );
+            var $town_dox = $('<div>').addClass('row towns').appendTo( $newCity );
+            $newCity.appendTo( $('#city_chart') );
 
             var ct_total = 0;
-            $('#zone_'+cname).html('');
+            var count = Object.keys(citys[city]).length;
 
-            $.each(cdata,function(zname,nums){
+            $.each(citys[city],function(zname,nums){
 
                 var row = [];
                 var color = colors[Math.floor(Math.random() * colors.length)];
@@ -173,7 +171,7 @@
                     ]);
                 });
 
-                var dom = $('<div>').attr('id',zname).attr('data-nums',total).addClass('city col-12 col-md-6 col-lg-4 pb-5').appendTo( $('#zone_'+cname) );
+                $('<div>').attr('id',zname).attr('data-nums',total).addClass('town col-12 col-md-6 col-lg-4 pb-5').appendTo( $town_dox );
 
                 ct_total += total;
 
@@ -193,25 +191,26 @@
 
                 var chart = new google.visualization.ColumnChart( document.getElementById(zname) );
                 chart.draw(data, options);
-            });
 
-            $('#tol_'+cname).text(ct_total);
+                if ( !--count ){
 
-            // sort
-            for( i=0 ; i< $('#zone_'+cname+' .city').length ; i++){
-                for( j=0 ; j< $('#zone_'+cname+' .city').length ; j++){
-                    $c1 = $('#zone_'+cname+' .city').eq(j);
-                    $c2 = $('#zone_'+cname+' .city').eq(j+1);
-                    if( $c1.data('nums') < $c2.data('nums') ){
-                        $c1.before($c2);
+                    $newCity.find('#city_tol').text(ct_total);
+                    //sort
+                    var length = $newCity.find('.town').length;
+                    for( i=0 ; i< length ; i++){
+                        for( j=0 ; j< length ; j++){
+                            var $c1 = $newCity.find('.town').eq(j);
+                            var $c2 = $newCity.find('.town').eq(j+1);
+                            if( parseInt($c1.data('nums')) < parseInt($c2.data('nums')) ){
+                                $c1.before($c2);
+                            }
+                        }
                     }
                 }
-            }
-
+            });
 
         }
         </script>
-
 
     </body>
 </html>
