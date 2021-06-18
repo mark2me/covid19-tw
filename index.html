@@ -62,35 +62,33 @@
 
             $.getJSON( "Day_Confirmation_Age_County_Gender_19CoV.json", function( data ) {
 
-                    $.each( data , function(index,val){
+                $.each( data , function(index,val){
 
-                        if( val.個案研判日 <= '20210511' ) return;
-                        if( val.是否為境外移入 == '是' ) return;
+                    if( val.個案研判日 <= '2021/05/11' ) return;
+                    if( val.是否為境外移入 == '是' ) return;
 
-                        //console.log(index,val);
+                    if( !days[val.個案研判日] ) days[val.個案研判日] = {};
 
-                        if( !days[val.個案研判日] ) days[val.個案研判日] = {};
+                    if( days[val.個案研判日][val.縣市] ){
+                        days[val.個案研判日][val.縣市] += parseInt(val.確定病例數)
+                    }else{
+                        days[val.個案研判日][val.縣市] = parseInt(val.確定病例數)
+                    }
 
-                        if( days[val.個案研判日][val.縣市] ){
-                            days[val.個案研判日][val.縣市] += parseInt(val.確定病例數)
-                        }else{
-                            days[val.個案研判日][val.縣市] = parseInt(val.確定病例數)
-                        }
+                    //
+                    if( val.縣市 !== '空值' && !citys[val.縣市] ) citys[val.縣市] = {};
+                    if( val.個案研判日 !== '' && !citys[val.縣市][val.鄉鎮] ) citys[val.縣市][val.鄉鎮] = {};
+                    if( citys[val.縣市][val.鄉鎮][val.個案研判日] ){
+                        citys[val.縣市][val.鄉鎮][val.個案研判日] +=  parseInt(val.確定病例數)
+                    }else{
+                        citys[val.縣市][val.鄉鎮][val.個案研判日] =  parseInt(val.確定病例數)
+                    }
 
-                        //
-                        if( val.縣市 !== '空值' && !citys[val.縣市] ) citys[val.縣市] = {};
-                        if( val.個案研判日 !== '' && !citys[val.縣市][val.鄉鎮] ) citys[val.縣市][val.鄉鎮] = {};
-                        if( citys[val.縣市][val.鄉鎮][val.個案研判日] ){
-                            citys[val.縣市][val.鄉鎮][val.個案研判日] +=  parseInt(val.確定病例數)
-                        }else{
-                            citys[val.縣市][val.鄉鎮][val.個案研判日] =  parseInt(val.確定病例數)
-                        }
+                });
 
-                    });
-
-                    //console.log(days);
-                    google.charts.load('current', {packages: ['corechart', 'bar']});
-                    google.charts.setOnLoadCallback(drawAll);
+                //console.log(days);
+                google.charts.load('current', {packages: ['corechart', 'bar']});
+                google.charts.setOnLoadCallback(drawAll);
 
             });
 
@@ -100,7 +98,6 @@
                     $(this).trigger('resizeEnd');
                 }, 500);
             });
-
 
             $(window).on('resizeEnd', function() {
                 console.log('resize');
@@ -118,7 +115,7 @@
                 $.each(v, function(d2,v2){
                     tol += parseInt(v2);
                 });
-                row.push([ (d.substring(4,6)+'/'+d.substring(6)) , tol, (tol - v.台北市 - v.新北市), v.新北市 , v.台北市 ]);
+                row.push([ (d.substring(5)) , tol, (tol - v.台北市 - v.新北市), v.新北市 , v.台北市 ]);
             });
 
             var data = new google.visualization.arrayToDataTable(row);
@@ -165,7 +162,7 @@
                 $.each(days,function(d){
                     total += parseInt( (nums[d] ? nums[d]:0) );
                     row.push([
-                        (d.substring(4,6)+'/'+d.substring(6)) ,
+                        (d.substring(5)) ,   // 2021/xx/xx
                         (nums[d] ? nums[d]:0),
                         color
                     ]);
