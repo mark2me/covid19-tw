@@ -64,7 +64,7 @@
 
                 $.each( data , function(index,val){
 
-                    if( val.個案研判日 <= '2021/05/11' ) return;
+                    if( val.個案研判日 <= '2022/01/01' ) return;
                     if( val.是否為境外移入 == '是' ) return;
 
                     if( !days[val.個案研判日] ) days[val.個案研判日] = {};
@@ -122,7 +122,7 @@
 
             var options = {
                 //title: '台灣本土確診案例數',
-                subtitle: '從2021-05-11',
+                subtitle: '從2022-01-01',
                 bar: {groupWidth: "80%"},
                 isStacked: 'absolute',
                 vAxis:{
