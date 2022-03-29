@@ -33,33 +33,6 @@
 
         $(function(){
 
-            /*
-            var endPo = "https://data.cdc.gov.tw/api/3/action/datastore_search_sql";
-            var args = {
-                sql:  'SELECT 個案研判日 as dd,縣市 as cy,性別 as sex,確定病例數 as n from "3c1e263d-16ec-4d70-b56c-21c9e2171fc7" WHERE 是否為境外移入=\'否\' AND 個案研判日>=\'20210511\''
-            }
-            */
-
-            /*
-            var endPo = 'https://data.cdc.gov.tw/api/3/action/datastore_search';
-            var args = {
-                resource_id: '3c1e263d-16ec-4d70-b56c-21c9e2171fc7', // the resource id
-                limit: 5000,
-                filters: '{"是否為境外移入":"否","個案研判日":"20210511"}'
-                //q: 'abc'
-            }
-
-            $.ajax({
-                url: endPo,
-                data: args,
-                dataType: 'jsonp',
-                cache: true,
-                success: function(data) {
-                    console.log(data);
-                }
-            });
-            */
-
             $.getJSON( "Day_Confirmation_Age_County_Gender_19CoV.json", function( data ) {
 
                 $.each( data , function(index,val){
@@ -139,6 +112,7 @@
             //draw city
             drawCity('台北市');
             drawCity('新北市');
+            drawCity('高雄市');
         }
 
         function drawCity(city) {
@@ -157,13 +131,16 @@
                 var row = [];
                 var color = colors[Math.floor(Math.random() * colors.length)];
                 var total = 0;
+                var maxV = 0;
 
                 row.push(['個案研判日', '數量', { role: 'style' } ]);
                 $.each(days,function(d){
-                    total += parseInt( (nums[d] ? nums[d]:0) );
+                    var n = parseInt( (nums[d] ? nums[d]:0) );
+                    if( n >= maxV ) maxV = n;
+                    total += n;
                     row.push([
                         (d.substring(5)) ,   // 2021/xx/xx
-                        (nums[d] ? nums[d]:0),
+                        n,
                         color
                     ]);
                 });
@@ -171,14 +148,15 @@
                 $('<div>').attr('id',zname).attr('data-nums',total).addClass('town col-12 col-md-6 col-lg-4 pb-5').appendTo( $town_dox );
 
                 ct_total += total;
+                if(maxV<10) maxV = 10;
 
                 var data = new google.visualization.arrayToDataTable(row);
                 var options = {
-                    title: zname + ' ('+total+' 例)',
+                    title: zname + ' (累計 '+total+' 例)',
                     bar: {groupWidth: "60%"},
                     legend: { position: "none" },
                     vAxis:{
-                        maxValue: 200,
+                        maxValue: maxV,
                         title: '日案例數'
                     },
                     hAxis:{
@@ -191,7 +169,7 @@
 
                 if ( !--count ){
 
-                    $newCity.find('#city_tol').text(ct_total);
+                    $newCity.find('#city_tol').text('共 ' + ct_total + ' 例');
                     //sort
                     var length = $newCity.find('.town').length;
                     for( i=0 ; i< length ; i++){
