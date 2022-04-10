@@ -19,7 +19,7 @@
             <div id="chart_div" style="height: 400px; width: 100%; max-width: 1600px; margin: 20px auto 0;"></div>
 
             <p style="text-align: center;">
-            資料來源：<a href="https://data.cdc.gov.tw/dataset/agsdctable-day-19cov" target="_blank">https://data.cdc.gov.tw/dataset/agsdctable-day-19cov</a>
+            資料來源：<a href="https://data.cdc.gov.tw/dataset/aagstable-day-19cov" target="_blank">https://data.cdc.gov.tw/dataset/aagstable-day-19cov</a>
             </p>
         </div>
 
@@ -28,6 +28,9 @@
 
         <script>
         var citys = {};
+        var cityTol = {};
+        var cityDay = {};
+        var cityName = ['台北市','新北市','桃園市','台中市','台南市','高雄市','基隆市','新竹市','新竹縣','苗栗縣','南投縣','彰化縣','雲林縣','嘉義市','嘉義縣','屏東縣','宜蘭縣','花蓮縣','台東縣','澎湖縣','金門縣'];
         var days = {};
         var colors = ['#0066ff','#29a329','#ff6600','#ff3399','#ffff00','#cc3300','#33ccff','#000099','#666699','#336600'];
 
@@ -37,9 +40,10 @@
 
                 $.each( data , function(index,val){
 
-                    if( val.個案研判日 <= '2022/01/01' ) return;
+                    if( val.個案研判日 < '2022/01/01' ) return;
                     if( val.是否為境外移入 == '是' ) return;
 
+                    // days
                     if( !days[val.個案研判日] ) days[val.個案研判日] = {};
 
                     if( days[val.個案研判日][val.縣市] ){
@@ -48,7 +52,7 @@
                         days[val.個案研判日][val.縣市] = parseInt(val.確定病例數)
                     }
 
-                    //
+                    //city with zone
                     if( val.縣市 !== '空值' && !citys[val.縣市] ) citys[val.縣市] = {};
                     if( val.個案研判日 !== '' && !citys[val.縣市][val.鄉鎮] ) citys[val.縣市][val.鄉鎮] = {};
                     if( citys[val.縣市][val.鄉鎮][val.個案研判日] ){
@@ -57,13 +61,29 @@
                         citys[val.縣市][val.鄉鎮][val.個案研判日] =  parseInt(val.確定病例數)
                     }
 
+                    // city Total nums
+                    if( !cityTol[val.縣市] ) cityTol[val.縣市] = 0;
+                    cityTol[val.縣市] += parseInt(val.確定病例數);
+
+                    //
+                    if( !cityDay[val.縣市] ) cityDay[val.縣市] = {};
+                    if( !cityDay[val.縣市][val.個案研判日] ) cityDay[val.縣市][val.個案研判日] = 0;
+
+                    if( cityDay[val.縣市][val.個案研判日] ){
+                        cityDay[val.縣市][val.個案研判日] += parseInt(val.確定病例數)
+                    }else{
+                        cityDay[val.縣市][val.個案研判日] = parseInt(val.確定病例數)
+                    }
+
+
                 });
 
-                //console.log(days);
+
                 google.charts.load('current', {packages: ['corechart', 'bar']});
                 google.charts.setOnLoadCallback(drawAll);
-
             });
+
+
 
             $(window).resize(function() {
                 if(this.resizeTO) clearTimeout(this.resizeTO);
@@ -73,7 +93,6 @@
             });
 
             $(window).on('resizeEnd', function() {
-                console.log('resize');
                 drawAll();
             });
         });
@@ -102,7 +121,7 @@
                     title: '每日總計案例數'
                 },
                 hAxis:{
-                    title: '個案研判日期（非校正回歸）'
+                    title: '個案研判日期'
                 }
             };
 
@@ -110,23 +129,25 @@
             chart.draw(data, options);
 
             //draw city
-            drawCity('台北市');
-            drawCity('新北市');
-            drawCity('高雄市');
+            //drawCityZone('台北市');
+            //drawCityZone('新北市');
+            //drawCityZone('高雄市');
+            drawCityTol(cityTol);
         }
 
-        function drawCity(city) {
+
+        function drawCityZone(ctName) {
 
             //add dom
-            var $newCity = $('<div>').attr('id','city_'+city).addClass('container-fluid section_city');
-            $('<h3>'+city+' <span id="city_tol"></span></h3>').appendTo( $newCity );
+            var $newCity = $('<div>').attr('id','city_'+ctName).addClass('container-fluid section_city');
+            $('<h3>'+ctName+' <span id="city_tol"></span></h3>').appendTo( $newCity );
             var $town_dox = $('<div>').addClass('row towns').appendTo( $newCity );
             $newCity.appendTo( $('#city_chart') );
 
             var ct_total = 0;
-            var count = Object.keys(citys[city]).length;
+            var count = Object.keys(citys[ctName]).length;
 
-            $.each(citys[city],function(zname,nums){
+            $.each(citys[ctName],function(zname,nums){
 
                 var row = [];
                 var color = colors[Math.floor(Math.random() * colors.length)];
@@ -185,6 +206,42 @@
             });
 
         }
+
+        function drawCityTol(cityTol){
+
+            const sortable = Object.fromEntries(
+    Object.entries(cityTol).sort(([,a],[,b]) => b-a)
+);
+
+            var row = [];
+            var maxV = 0;
+
+            row.push(['縣市', '數量', { role: 'style' } , { role: 'annotation' }  ]);
+            $.each(sortable,function(zname,nums){
+                if( maxV < nums ) maxV = nums;
+                row.push([ zname, nums, colors[Math.floor(Math.random() * colors.length)] , nums]);
+            });
+
+            $('<div>').attr('id','tol_citys').css('height','400px').appendTo($('#city_chart'));
+
+            var data = new google.visualization.arrayToDataTable(row);
+            var options = {
+                title: '2022/1月以來 台灣各個城市統計確診數量',
+                bar: {groupWidth: "60%"},
+                legend: { position: "none" },
+                vAxis:{
+                    maxValue: (maxV*1.1),
+                    title: '案例數'
+                },
+                hAxis:{
+                    title: '城市類別'
+                }
+            };
+
+            var chart = new google.visualization.ColumnChart( document.getElementById('tol_citys') );
+            chart.draw(data, options);
+        }
+
         </script>
 
     </body>
