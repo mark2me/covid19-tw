@@ -25,14 +25,26 @@
         </div>
 
         <div class="container-fluid" style="margin-bottom: 80px;">
-            <div id="tw_city_tol_chart" style="height: 400px; width: 100%; max-width: 1600px;"></div>
+            <div class="row">
+                <div class="col-12 col-lg-8">
+                    <div id="tw_city_tol_chart" style="height: 400px; width: 100%; max-width: 1600px;"></div>
+                </div>
+                <div class="col-12 col-lg-4">
+                    <div id="tw_city_tol_pie" class="row"></div>
+                </div>
+            </div>
         </div>
 
         <div class="container-fluid" style="margin-bottom: 80px;">
-            <div id="city_day_chart" class="row"></div>
+            <div class="row">
+                <div class="col-12 col-lg-8">
+                    <div id="tw_city_zone_tol_chart" style="height: 400px; width: 100%; max-width: 1600px;"></div>
+                </div>
+                <div class="col-12 col-lg-4">
+                    <div id="tw_city_zone_tol_pie" class="row"></div>
+                </div>
+            </div>
         </div>
-
-
 
         <script>
         var tw_day = {};
@@ -143,15 +155,80 @@
             //draw city
             drawCityTol(tw_city_tol);
 
-            drawCityZoneTol('台北市');
-
-            drawCityZoneTol('新北市');
+            //drawCityZoneTol('台北市');
+            //drawCityZoneTol('新北市');
 
             //drawCityZone('台北市');
             //drawCityZone('新北市');
             //drawCityZone('高雄市');
 
 
+        }
+
+        function drawCityTol(tw_city_tol){
+
+            const sort_tw_city_tol = Object.fromEntries(
+                Object.entries(tw_city_tol).sort(([,a],[,b]) => b-a)
+            );
+
+            var row = [];
+            var maxV = 0;
+
+            row.push(['縣市', '數量', { role: 'style' } , { role: 'annotation' }  ]);
+            $.each(sort_tw_city_tol,function(zname,nums){
+                if( maxV < nums ) maxV = nums;
+                row.push([ zname, nums, colors[Math.floor(Math.random() * colors.length)] , nums]);
+            });
+
+            var data = new google.visualization.arrayToDataTable(row);
+
+            var options = {
+                title: '2022/1月以來 台灣各個城市統計確診數量',
+                bar: {groupWidth: "70%"},
+                legend: { position: "none" },
+                chartArea: {width: '95%'},
+                vAxis:{
+                    maxValue: (maxV*1.1),
+                    title: '案例數'
+                },
+                hAxis:{
+                    title: '縣市'
+                }
+            };
+            var chart = new google.visualization.ColumnChart( document.getElementById('tw_city_tol_chart') );
+            chart.draw(data, options);
+
+            var options2 = {
+                title: '台灣各縣市百分比',
+                height: 400,
+                chartArea:{ left:15, top: '15%', width:'90%',height:'70%'},
+                is3D: true,
+                //pieHole: 0.2,
+                //pieSliceText: 'value',
+                sliceVisibilityThreshold: 0.01,
+                legend:{ alignment: 'center', position: 'labeled', maxLines: 3 }
+            };
+
+            var chart2 = new google.visualization.PieChart( document.getElementById('tw_city_tol_pie') );
+            chart2.draw(data, options2);
+
+
+            // show first city
+            var first_city =  Object.keys(sort_tw_city_tol)[0];
+            drawCityZoneTol(first_city);
+            drawCityZone(first_city);
+
+            //listen click city bar
+            google.visualization.events.addListener(chart, 'select', function(){
+                var selection = chart.getSelection();
+                if(selection.length){
+                    var item = selection[0];
+                    //var city = data.getFormattedValue(item.row, 0)
+                    //var val = data.getFormattedValue(item.row, item.column);
+                    drawCityZoneTol(data.getFormattedValue(item.row, 0));
+                    drawCityZone(data.getFormattedValue(item.row, 0));
+                }
+            });
         }
 
 
@@ -161,7 +238,7 @@
             var $newCity = $('<div>').attr('id','city_'+ctName).addClass('container-fluid section_city');
             $('<h3>'+ctName+' <span id="city_tol"></span></h3>').appendTo( $newCity );
             var $town_dox = $('<div>').addClass('row towns').appendTo( $newCity );
-            $newCity.appendTo( $('#city_day_chart') );
+            $newCity.appendTo( $('#tw_city_zone_tol_chart') );
 
             var ct_total = 0;
             var count = Object.keys(city_day[ctName]).length;
@@ -197,10 +274,10 @@
                     legend: { position: "none" },
                     vAxis:{
                         maxValue: maxV,
-                        title: '日案例數'
+                        title: '案 例 數'
                     },
                     hAxis:{
-                        title: '個案研判日期（非校正回歸）'
+                        title: '日 期'
                     }
                 };
 
@@ -226,65 +303,33 @@
 
         }
 
-        function drawCityTol(tw_city_tol){
-
-            const sortable = Object.fromEntries(
-                Object.entries(tw_city_tol).sort(([,a],[,b]) => b-a)
-            );
-
-            var row = [];
-            var maxV = 0;
-
-            row.push(['縣市', '數量', { role: 'style' } , { role: 'annotation' }  ]);
-            $.each(sortable,function(zname,nums){
-                if( maxV < nums ) maxV = nums;
-                row.push([ zname, nums, colors[Math.floor(Math.random() * colors.length)] , nums]);
-            });
-
-            var data = new google.visualization.arrayToDataTable(row);
-            var options = {
-                title: '2022/1月以來 台灣各個城市統計確診數量',
-                bar: {groupWidth: "60%"},
-                legend: { position: "none" },
-                vAxis:{
-                    maxValue: (maxV*1.1),
-                    title: '案例數'
-                },
-                hAxis:{
-                    title: '城市類別'
-                }
-            };
-
-            var chart = new google.visualization.ColumnChart( document.getElementById('tw_city_tol_chart') );
-            chart.draw(data, options);
-        }
-
-
         function drawCityZoneTol(city){
 
             const sortable = Object.fromEntries(
                 Object.entries(city_zone_tol[city]).sort(([,a],[,b]) => b-a)
             );
 
-            var $newCity = $('<div>').attr('id','cityzone_'+city).addClass('col-12 col-sm-6');
-            $newCity.appendTo( $('#city_day_chart') );
+            $('#tw_city_zone_tol_chart').html('');
 
             var row = [];
             row.push(['區域', '數量' ]);
             $.each(sortable,function(zname,nums){
-                row.push([ zname, nums ]);
+                row.push([ zname+'('+nums+')', nums ]);
             });
 
             var data = new google.visualization.arrayToDataTable(row);
             var options = {
-                title: '自2022/01 '+city+' 確診比例',
+                title: city+'鄉鎮市區百分比',
                 height: 400,
-                chartArea:{left:0,top:0,width:'95%',height:'100%'},
+                chartArea:{ left:15, top: '15%', width:'90%',height:'70%'},
                 is3D: true,
-                pieSliceText: 'value'
+                //pieHole: 0.2,
+                //pieSliceText: 'value',
+                sliceVisibilityThreshold: 0.02,
+                legend:{ alignment: 'center', position: 'labeled', maxLines: 3 }
             };
 
-            var chart = new google.visualization.PieChart( document.getElementById('cityzone_'+city) );
+            var chart = new google.visualization.PieChart( document.getElementById('tw_city_zone_tol_pie') );
             chart.draw(data, options);
         }
         </script>
