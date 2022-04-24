@@ -27,7 +27,7 @@
         <div class="container-fluid" style="margin-bottom: 80px;">
             <div class="row">
                 <div class="col-12 col-lg-4 order-1 order-lg-2">
-                    <div id="tw_city_tol_pie" class="row"></div>
+                    <div id="tw_city_tol_pie" class=""></div>
                 </div>
 
                 <div class="col-12 col-lg-8 order-2 order-lg-1">
@@ -40,7 +40,7 @@
         <div class="container-fluid" style="margin-bottom: 80px;">
             <div class="row">
                 <div class="col-12 col-lg-4 order-1 order-lg-2">
-                    <div id="tw_city_zone_tol_pie" class="row"></div>
+                    <div id="tw_city_zone_tol_pie" class=""></div>
                 </div>
                 <div class="col-12 col-lg-8 order-2 order-lg-1">
                     <div id="tw_city_zone_tol_chart" style="width: 100%; max-width: 1600px;"></div>
@@ -187,9 +187,10 @@
 
             var options = {
                 title: '2022/1月以來 各城市統計確診數量(可點擊縣市看明細)',
-                bar: {groupWidth: "70%"},
+                bar: { groupWidth: "70%"},
                 legend: { position: "none" },
-                chartArea: {width: '95%'},
+                width: '100%',
+                chartArea: {width: '90%'},
                 vAxis:{
                     maxValue: (maxV*1.1),
                     title: '案例數'
@@ -204,7 +205,9 @@
             var options2 = {
                 title: '台灣各縣市百分比',
                 height: 400,
-                chartArea:{ left:15, top: '15%', width:'90%',height:'70%'},
+                width: '100%',
+                //chartArea:{ left:15, top: '15%'}, //width:'90%',height:'70%'
+                chartArea:{ width:'90%' },
                 is3D: true,
                 //pieHole: 0.2,
                 //pieSliceText: 'value',
@@ -279,7 +282,8 @@
                 var options = {
                     title: zname + ' (累計 '+total+' 例)',
                     bar: {groupWidth: "60%"},
-                    chartArea: {width: '95%'},
+                    with: '100%',
+                    chartArea: { width: '90%'},
                     legend: { position: "none" },
                     vAxis:{
                         maxValue: (maxV*1.1),
@@ -330,7 +334,9 @@
             var options = {
                 title: city+'鄉鎮市區百分比',
                 height: 400,
-                chartArea:{ left:15, top: '15%', width:'90%',height:'70%'},
+                window: '100%',
+                //chartArea:{ left:15, top: '15%', width:'90%',height:'70%'},
+                chartArea:{ width: '90%' },
                 is3D: true,
                 //pieHole: 0.2,
                 //pieSliceText: 'value',
