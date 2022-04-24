@@ -250,16 +250,20 @@
                 var total = 0;
                 var maxV = 0;
 
-                row.push(['個案研判日', '數量', { role: 'style' } ]);
+                row.push(['個案研判日', '數量', { role: 'style' }, { role: 'annotation' } ]);
                 $.each(tw_day,function(d){
                     var n = parseInt( (nums[d] ? nums[d]:0) );
                     if( n >= maxV ) maxV = n;
                     total += n;
+
+                    if(d>'2022/04/01'){
                     row.push([
                         (d.substring(5)) ,   // 2021/xx/xx
                         n,
-                        color
+                        color,
+                        n
                     ]);
+                    }
                 });
 
                 $('<div>').attr('id',zname).attr('data-nums',total).addClass('town col-12 col-md-6 col-lg-4 pb-5').appendTo( $town_dox );
@@ -271,9 +275,10 @@
                 var options = {
                     title: zname + ' (累計 '+total+' 例)',
                     bar: {groupWidth: "60%"},
+                    chartArea: {width: '95%'},
                     legend: { position: "none" },
                     vAxis:{
-                        maxValue: maxV,
+                        maxValue: (maxV*1.1),
                         title: '案 例 數'
                     },
                     hAxis:{
