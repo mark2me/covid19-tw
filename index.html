@@ -26,23 +26,26 @@
 
         <div class="container-fluid" style="margin-bottom: 80px;">
             <div class="row">
-                <div class="col-12 col-lg-8">
-                    <div id="tw_city_tol_chart" style="height: 400px; width: 100%; max-width: 1600px;"></div>
-                </div>
-                <div class="col-12 col-lg-4">
+                <div class="col-12 col-lg-4 order-1 order-lg-2">
                     <div id="tw_city_tol_pie" class="row"></div>
                 </div>
+
+                <div class="col-12 col-lg-8 order-2 order-lg-1">
+                    <div id="tw_city_tol_chart" style="height: 400px; width: 100%; max-width: 1600px;"></div>
+                </div>
+
             </div>
         </div>
 
         <div class="container-fluid" style="margin-bottom: 80px;">
             <div class="row">
-                <div class="col-12 col-lg-8">
-                    <div id="tw_city_zone_tol_chart" style="height: 400px; width: 100%; max-width: 1600px;"></div>
-                </div>
-                <div class="col-12 col-lg-4">
+                <div class="col-12 col-lg-4 order-1 order-lg-2">
                     <div id="tw_city_zone_tol_pie" class="row"></div>
                 </div>
+                <div class="col-12 col-lg-8 order-2 order-lg-1">
+                    <div id="tw_city_zone_tol_chart" style="width: 100%; max-width: 1600px;"></div>
+                </div>
+
             </div>
         </div>
 
@@ -183,7 +186,7 @@
             var data = new google.visualization.arrayToDataTable(row);
 
             var options = {
-                title: '2022/1月以來 台灣各個城市統計確診數量',
+                title: '2022/1月以來 各城市統計確診數量(可點擊縣市看明細)',
                 bar: {groupWidth: "70%"},
                 legend: { position: "none" },
                 chartArea: {width: '95%'},
@@ -227,6 +230,8 @@
                     //var val = data.getFormattedValue(item.row, item.column);
                     drawCityZoneTol(data.getFormattedValue(item.row, 0));
                     drawCityZone(data.getFormattedValue(item.row, 0));
+
+                    $('#tw_city_zone_tol_chart')[0].scrollIntoView();
                 }
             });
         }
@@ -235,10 +240,9 @@
         function drawCityZone(ctName) {
 
             //add dom
-            var $newCity = $('<div>').attr('id','city_'+ctName).addClass('container-fluid section_city');
-            $('<h3>'+ctName+' <span id="city_tol"></span></h3>').appendTo( $newCity );
-            var $town_dox = $('<div>').addClass('row towns').appendTo( $newCity );
-            $newCity.appendTo( $('#tw_city_zone_tol_chart') );
+            $('<h3 style="text-align:center;">'+ctName+' <span id="city_tol"></span></h3>').appendTo( $('#tw_city_zone_tol_chart') );
+
+            var $zones_dox = $('<div>').addClass('row towns').appendTo( $('#tw_city_zone_tol_chart') );
 
             var ct_total = 0;
             var count = Object.keys(city_day[ctName]).length;
@@ -256,7 +260,7 @@
                     if( n >= maxV ) maxV = n;
                     total += n;
 
-                    if(d>'2022/04/01'){
+                    if(d>='2022/04/01'){
                     row.push([
                         (d.substring(5)) ,   // 2021/xx/xx
                         n,
@@ -266,7 +270,7 @@
                     }
                 });
 
-                $('<div>').attr('id',zname).attr('data-nums',total).addClass('town col-12 col-md-6 col-lg-4 pb-5').appendTo( $town_dox );
+                $('<div>').attr('id',zname).attr('data-nums',total).addClass('town col-12 col-md-6 col-lg-4 pb-5').appendTo( $zones_dox );
 
                 ct_total += total;
                 if(maxV<10) maxV = 10;
@@ -291,13 +295,13 @@
 
                 if ( !--count ){
 
-                    $newCity.find('#city_tol').text('共 ' + ct_total + ' 例');
+                    $('#tw_city_zone_tol_chart span').text('共 ' + ct_total + ' 例');
                     //sort
-                    var length = $newCity.find('.town').length;
+                    var length = $zones_dox.find('.town').length;
                     for( i=0 ; i< length ; i++){
                         for( j=0 ; j< length ; j++){
-                            var $c1 = $newCity.find('.town').eq(j);
-                            var $c2 = $newCity.find('.town').eq(j+1);
+                            var $c1 = $zones_dox.find('.town').eq(j);
+                            var $c2 = $zones_dox.find('.town').eq(j+1);
                             if( parseInt($c1.data('nums')) < parseInt($c2.data('nums')) ){
                                 $c1.before($c2);
                             }
