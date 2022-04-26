@@ -53,11 +53,8 @@
         var tw_day = {};
         var tw_city_tol = {};
         var city_day = {};
-
         var city_zone_tol = {}
 
-
-//        var cityName = ['台北市','新北市','桃園市','台中市','台南市','高雄市','基隆市','新竹市','新竹縣','苗栗縣','南投縣','彰化縣','雲林縣','嘉義市','嘉義縣','屏東縣','宜蘭縣','花蓮縣','台東縣','澎湖縣','金門縣'];
 
         var colors = ['#0066ff','#29a329','#ff6600','#ff3399','#ffff00','#cc3300','#33ccff','#000099','#666699','#336600'];
 
@@ -126,21 +123,23 @@
         function drawAll() {
 
             var row = [];
-            row.push(['個案研判日', { role: 'annotation' }, '其他縣市', '新北市', '台北市' ]);  //{ role: 'annotation' }
+            row.push(['個案研判日', '其他縣市', '新北市', '台北市', { role: 'annotation' }]);
             $.each(tw_day,function(d,v){
                 var tol = 0;
                 $.each(v, function(d2,v2){
                     tol += parseInt(v2);
                 });
-                row.push([ (d.substring(5)) , tol, (tol - v.台北市 - v.新北市), v.新北市 , v.台北市 ]);
+
+                if(d>='2022/03/01'){
+                    row.push([ (d.substring(5)) , (tol - v.台北市 - v.新北市), v.新北市 , v.台北市, tol ]);
+                }
             });
 
             var data = new google.visualization.arrayToDataTable(row);
 
             var options = {
                 //title: '台灣本土確診案例數',
-                subtitle: '從2022-01-01',
-                bar: {groupWidth: "80%"},
+                bar: { groupWidth: "70%"},
                 isStacked: 'absolute',
                 vAxis:{
                     title: '每日總計案例數'
