@@ -53,10 +53,12 @@
         var tw_day = {};
         var tw_city_tol = {};
         var city_day = {};
-        var city_zone_tol = {}
+        var city_zone_tol = {};
+        var tw_city_pop = { '台北市':2490445,'新北市':3989880,'桃園市':2266913,'台中市':2806385,'台南市':1855449,'高雄市':2731782,
+            '基隆市':362239,'新竹縣':575746,'新竹市':451689,'苗栗縣':536585,'南投縣':482841,'彰化縣':1250631,'雲林縣':667667,'嘉義縣':491507,'嘉義市':263821,'屏東縣':801914,
+            '宜蘭縣':449435,'花蓮縣':320405,'台東縣':213032,'金門縣':140740,'澎湖縣':106174,'連江縣':13711 };
 
-
-        var colors = ['#0066ff','#29a329','#ff6600','#ff3399','#ffff00','#cc3300','#33ccff','#000099','#666699','#336600'];
+        var colorType = ['#0066ff','#29a329','#ff6600','#ff3399','#ffff00','#cc3300','#33ccff','#000099','#666699','#336600'];
 
         $(function(){
 
@@ -154,15 +156,8 @@
 
             //draw city
             drawCityTol(tw_city_tol);
-
             //drawCityZoneTol('台北市');
-            //drawCityZoneTol('新北市');
-
             //drawCityZone('台北市');
-            //drawCityZone('新北市');
-            //drawCityZone('高雄市');
-
-
         }
 
         function drawCityTol(tw_city_tol){
@@ -172,31 +167,40 @@
             );
 
             var row = [];
+            var colors = [];
             var maxV = 0;
 
-            row.push(['縣市', '數量', { role: 'style' } , { role: 'annotation' }  ]);
+            row.push(['縣市', '數量', { role: 'style' } , { role: 'annotation' } , '人口百分比' ]);
             $.each(sort_tw_city_tol,function(zname,nums){
                 if( maxV < nums ) maxV = nums;
-                row.push([ zname, nums, colors[Math.floor(Math.random() * colors.length)] , nums]);
+                var percent = (nums/tw_city_pop[zname]*100).toFixed(3);
+                var color = colorType[Math.floor(Math.random() * colorType.length)];
+                colors.push(color);
+                row.push([ zname, nums, color, nums, parseFloat(percent) ]);
             });
 
             var data = new google.visualization.arrayToDataTable(row);
 
             var options = {
-                title: '2022/1月以來 各城市統計確診數量(可點擊縣市看明細)',
+                title: '2022/01 以來 各城市確診人口累計(可點擊縣市看明細)',
                 bar: { groupWidth: "70%"},
                 legend: { position: "none" },
                 width: '100%',
-                chartArea: {width: '90%'},
-                vAxis:{
-                    maxValue: (maxV*1.1),
-                    title: '案例數'
+                chartArea: {width: '85%'},
+                series:{
+                    0: { targetAxisIndex: 0 ,type: 'bars'},
+                    1: { targetAxisIndex: 3 ,type: 'line'},
                 },
-                hAxis:{
-                    title: '縣市'
+                vAxes:{
+
+                    0: { title: '確診人口數', titleTextStyle: { italic: false } },
+                    3: { title: '人口百分比', titleTextStyle: { italic: false } }
                 }
+
             };
-            var chart = new google.visualization.ColumnChart( document.getElementById('tw_city_tol_chart') );
+
+            //var chart = new google.visualization.ColumnChart( document.getElementById('tw_city_tol_chart') );
+            var chart = new google.visualization.ComboChart( document.getElementById('tw_city_tol_chart') );
             chart.draw(data, options);
 
             var options2 = {
@@ -206,6 +210,7 @@
                 //chartArea:{ left:15, top: '15%'}, //width:'90%',height:'70%'
                 chartArea:{ width: '95%' },
                 is3D: true,
+                colors: colors,
                 //pieHole: 0.2,
                 //pieSliceText: 'value',
                 sliceVisibilityThreshold: 0.01,
@@ -250,7 +255,7 @@
             $.each(city_day[ctName],function(zname,nums){
 
                 var row = [];
-                var color = colors[Math.floor(Math.random() * colors.length)];
+                var color = colorType[Math.floor(Math.random() * colorType.length)];
                 var total = 0;
                 var maxV = 0;
 
