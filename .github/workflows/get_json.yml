@@ -21,6 +21,6 @@ jobs:
       id: update_file
       uses: mark2me/covid19-tw@main
       with:
-        url: https://od.cdc.gov.tw/eic/Age_County_Gender_day_19Cov.json
-        file_in_repo: Age_County_Gender_day_19Cov.json
+        url: https://od.cdc.gov.tw/eic/Day_Confirmation_Age_County_Gender_19CoV.json
+        file_in_repo: Day_Confirmation_Age_County_Gender_19CoV.json
         
