@@ -17,6 +17,7 @@
             <h3 style="text-align: center;">2022 台灣本土 COVID-19 確診案例統計</h3>
             <p style="text-align: center;">
             資料來源：<a href="https://data.cdc.gov.tw/dataset/aagstable-day-19cov" target="_blank">https://data.cdc.gov.tw/dataset/aagstable-day-19cov</a>
+            <!-- https://data.cdc.gov.tw/download?resourceid=a59483fd-4b09-42bd-af15-3c123147d7e3&dataurl=https://od.cdc.gov.tw/eic/Day_Confirmation_Age_County_Gender_19CoV.json -->
             </p>
         </div>
 
@@ -58,7 +59,7 @@
             '基隆市':362239,'新竹縣':575746,'新竹市':451689,'苗栗縣':536585,'南投縣':482841,'彰化縣':1250631,'雲林縣':667667,'嘉義縣':491507,'嘉義市':263821,'屏東縣':801914,
             '宜蘭縣':449435,'花蓮縣':320405,'台東縣':213032,'金門縣':140740,'澎湖縣':106174,'連江縣':13711 };
 
-        var colorType = ['#0066ff','#29a329','#ff6600','#ff3399','#ffff00','#cc3300','#33ccff','#000099','#666699','#336600'];
+        var colorType = ['#FFFF00','#FF9900','#FF3300','#CCFF00','#CC9900','#CC6600','#CC0000','#99FF00','#999900','#990000','#66CC00','#666600','#33CC00','#339900','#9933FF','#66CCFF','#3333FF','#0000FF'];
 
         $(function(){
 
@@ -125,22 +126,31 @@
         function drawAll() {
 
             var row = [];
-            row.push(['個案研判日', '其他縣市', '新北市', '台北市', { role: 'annotation' }]);
+            var yestoday_tol = 0;
+            //row.push(['個案研判日', '其他縣市', '新北市', '台北市', { role: 'annotation' }]);
+            row.push( ['個案研判日', '確診數', '新增人數']);
             $.each(tw_day,function(d,v){
                 var tol = 0;
                 $.each(v, function(d2,v2){
                     tol += parseInt(v2);
                 });
 
-                if(d>='2022/03/01'){
-                    row.push([ (d.substring(5)) , (tol - v.台北市 - v.新北市), v.新北市 , v.台北市, tol ]);
+                if(d>='2022/04/01'){
+                    var percent = ((tol - yestoday_tol) / yestoday_tol*100).toFixed(2);
+                    percent = (percent>0) ? parseFloat(percent) : 0;
+                    var newAdd =  (tol - yestoday_tol) > 0 ? (tol - yestoday_tol): 0;
+                    //row.push([ (d.substring(5)) , (tol - v.台北市 - v.新北市), v.新北市 , v.台北市, tol]);
+                    row.push([ (d.substring(5)), tol, newAdd  ]);
+                    yestoday_tol = tol;
                 }
             });
 
             var data = new google.visualization.arrayToDataTable(row);
 
             var options = {
-                //title: '台灣本土確診案例數',
+                title: '2022/4 以來台灣本土確診案例數',
+                legend: { position: 'in' },
+                /*
                 bar: { groupWidth: "70%"},
                 isStacked: 'absolute',
                 vAxis:{
@@ -149,9 +159,24 @@
                 hAxis:{
                     title: '個案研判日期'
                 }
+                */
+                //bar: { groupWidth: "70%"},
+                //legend: { position: "none" },
+                //width: '100%',
+                //chartArea: {width: '85%'},
+                series:{
+                    0: { targetAxisIndex: 0, type: 'bars'},
+                    1: { targetAxisIndex: 1, type: 'line' , lineWidth:1, pointShape:'square', pointSize: 10 },
+                },
+                vAxes:{
+                    0: { title: '確診人口數', titleTextStyle: { italic: false } },
+                    1: { title: '新增數', titleTextStyle: { italic: false }}
+                }
+
             };
 
-            var chart = new google.visualization.ColumnChart( document.getElementById('tw_day_chart') );
+            //var chart = new google.visualization.ColumnChart( document.getElementById('tw_day_chart') );
+            var chart = new google.visualization.ComboChart( document.getElementById('tw_day_chart') );
             chart.draw(data, options);
 
             //draw city
@@ -192,7 +217,6 @@
                     1: { targetAxisIndex: 3 ,type: 'line'},
                 },
                 vAxes:{
-
                     0: { title: '確診人口數', titleTextStyle: { italic: false } },
                     3: { title: '人口百分比', titleTextStyle: { italic: false } }
                 }
