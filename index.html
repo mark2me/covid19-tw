@@ -128,7 +128,7 @@
             var row = [];
             var yestoday_tol = 0;
             //row.push(['個案研判日', '其他縣市', '新北市', '台北市', { role: 'annotation' }]);
-            row.push( ['個案研判日', '確診數', '新增人數']);
+            row.push( ['個案研判日', '確診數', { role: 'annotation' }, '新增人數']);
             $.each(tw_day,function(d,v){
                 var tol = 0;
                 $.each(v, function(d2,v2){
@@ -140,7 +140,7 @@
                     percent = (percent>0) ? parseFloat(percent) : 0;
                     var newAdd =  (tol - yestoday_tol) > 0 ? (tol - yestoday_tol): 0;
                     //row.push([ (d.substring(5)) , (tol - v.台北市 - v.新北市), v.新北市 , v.台北市, tol]);
-                    row.push([ (d.substring(5)), tol, newAdd  ]);
+                    row.push([ (d.substring(5)), tol, percent+'%', newAdd ]);
                     yestoday_tol = tol;
                 }
             });
@@ -164,13 +164,19 @@
                 //legend: { position: "none" },
                 //width: '100%',
                 //chartArea: {width: '85%'},
+                annotations: {
+                    textStyle: {
+                        fontSize: 11
+                    },
+                },
                 series:{
                     0: { targetAxisIndex: 0, type: 'bars'},
-                    1: { targetAxisIndex: 1, type: 'line' , lineWidth:1, pointShape:'square', pointSize: 10 },
+                    1: { targetAxisIndex: 2, type: 'line' , lineWidth:1, pointShape:'square', pointSize: 10 },
+
                 },
                 vAxes:{
                     0: { title: '確診人口數', titleTextStyle: { italic: false } },
-                    1: { title: '新增數', titleTextStyle: { italic: false }}
+                    1: { title: '新增數', titleTextStyle: { italic: false }},
                 }
 
             };
@@ -207,7 +213,7 @@
             var data = new google.visualization.arrayToDataTable(row);
 
             var options = {
-                title: '2022/01 以來 各城市確診人口累計(可點擊縣市看明細)',
+                title: '2022/01 以來 各城市確診人口累計(可點擊縣市線條圖看下方明細)',
                 bar: { groupWidth: "70%"},
                 legend: { position: "none" },
                 width: '100%',
